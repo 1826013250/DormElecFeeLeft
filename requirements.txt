@@ -1,0 +1,4 @@
+requests
+PySide6
+winshell; sys_platform == 'win32'
+pypiwin32; sys_platform == 'win32'
