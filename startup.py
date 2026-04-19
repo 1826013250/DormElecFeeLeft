@@ -39,11 +39,11 @@ def win_set_autostart(app_name: str, enable: bool) -> bool:
                 shortcut.WorkingDirectory = os.path.dirname(app_path)
                 shortcut.IconLocation = app_path
                 shortcut.save()
-                return True
+            return True
         else:
             if os.path.exists(shortcut_path):
                 os.remove(shortcut_path)
-                return True
+            return True
     except Exception as e:
         logger.error(traceback.format_exc())
     return False
