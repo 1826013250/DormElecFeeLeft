@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from PySide6.QtCore import QModelIndex, Qt, QThreadPool
+from PySide6.QtCore import QModelIndex, Qt, QThreadPool, QTimer
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QDialog, QMessageBox, QVBoxLayout, QLabel, QAbstractItemView
 
@@ -116,6 +116,10 @@ class DialogSelectDormitory(QDialog, Ui_DialogDormSelection):
 
     def __on_request_finished(self, r, data):
         self.dialog.accept()
+        if isinstance(r, list) and len(r) == 1:
+            QMessageBox.critical(self, "错误！", "获取信息失败！")
+            QTimer.singleShot(10, self, self.reject)
+            return
         self.parent_item.removeRow(0)
         for i in r:
             item = QStandardItem(i["name"])
@@ -138,7 +142,6 @@ class DialogSelectDormitory(QDialog, Ui_DialogDormSelection):
             self.parent_item.appendRow(item)
         self.column_view.setColumnWidths([150 for _ in range(4)])
         self.model.layoutChanged.emit()
-
 
     def accept(self, /):
         if not self.selected_dorm_id:
