@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QDialog, QMessageBox, QVBoxLayout, QLabel, QAbstra
 
 from design.set_time_interval import Ui_DialogSetTimeInterval
 from design.dorm_selection import Ui_DialogDormSelection
-from util import TimeUnits, RunnableGetDromInfo
+from util import TimeUnits, RunnableGetDormInfo
 
 
 class NormalDialog(QDialog):
@@ -88,7 +88,7 @@ class DialogSelectDormitory(QDialog, Ui_DialogDormSelection):
         self.parent_item = self.model
         self.model.appendRow(QStandardItem("正在加载..."))
         self.dialog = NormalDialog(self, "请稍后", "正在请求数据...")
-        runnable = RunnableGetDromInfo(self.student_id, {
+        runnable = RunnableGetDormInfo(self.student_id, {
                 "op_type": 0,
                 "area_id": "0",
                 "build_id": "0",
@@ -109,7 +109,7 @@ class DialogSelectDormitory(QDialog, Ui_DialogDormSelection):
             self.selected_dorm_id = None
             self.parent_item.appendRow(QStandardItem("正在加载..."))
             self.dialog = NormalDialog(self, "请稍后", "正在请求数据...")
-            runnable = RunnableGetDromInfo(self.student_id, data)
+            runnable = RunnableGetDormInfo(self.student_id, data)
             runnable.signal.signal_dorm_info_request_finished.connect(self.__on_request_finished)
             self.thread_pool.start(runnable)
             self.dialog.exec()
@@ -125,7 +125,7 @@ class DialogSelectDormitory(QDialog, Ui_DialogDormSelection):
                 "build_id": data["build_id"],
                 "level_id": data["level_id"],
             }
-            item_data[["area_id", "build_id", "level_id", "dorm_id"][data["op_type"]]] = i["id"]
+            item_data[str(["area_id", "build_id", "level_id", "dorm_id"][data["op_type"]])] = i["id"]
             item.setData(item_data, Qt.ItemDataRole.UserRole)
             if isinstance(self.parent_item, QStandardItem):
                 display_name = self.parent_item.data(Qt.ItemDataRole.UserRole + 1)
