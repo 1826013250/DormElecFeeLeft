@@ -1,15 +1,27 @@
 import sys
-from datetime import datetime
+import os
+import logging
 
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox, QWidget, QMenu, QInputDialog
 from PySide6.QtCore import QTimer, QThreadPool
 from PySide6.QtGui import QIcon, QAction
 
 from startup import set_autostart
-from util import get_power, TimeUnits, Settings, RunnableGetPowerInfo, log_info
+from util import get_power, TimeUnits, Settings, RunnableGetPowerInfo, get_program_dir
 from widgets import DialogSetTimeInterval, DialogSelectDormitory
 
 APP_NAME = "DormElecFeeLeft"
+logger = logging.getLogger("app")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('[%(asctime)s/%(levelname)s] %(message)s')
+file_handler = logging.FileHandler(os.path.join(get_program_dir(), "log.txt"), 'w', encoding='utf-8')
+file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+console_handler.setLevel(logging.DEBUG)
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 class App(QWidget):
@@ -98,7 +110,10 @@ class App(QWidget):
         self.tray_icon.show()
 
     def __update_tray_texts(self):
-        self.action_text_details.setText(f"剩余电量：{self.quantity:.2f} {self.quantity_unit}")
+        if self.quantity < 0:
+            self.action_text_details.setText(self.quantity_unit)
+        else:
+            self.action_text_details.setText(f"剩余电量：{self.quantity:.2f} {self.quantity_unit}")
 
     def __select_dormitory(self):
         dialog = DialogSelectDormitory(self.settings.student_id, self)
@@ -156,7 +171,7 @@ class App(QWidget):
             QMessageBox.warning(self, "注意！", "您未选择宿舍！请前往菜单选择您的宿舍")
             self.timer_query.stop()
             return
-        log_info("查询开始!")
+        logger.info("查询开始!")
         runnable = RunnableGetPowerInfo(self.settings.last_dorm_id)
         runnable.signal.signal_power_request_finished.connect(self.__query_data_callback)
         self.thread_pool.start(runnable)
@@ -171,14 +186,21 @@ class App(QWidget):
                                     "当前电量已到达警告阈值！\n"
                                     + f"当前：{self.quantity} 度, 警告阈值：{self.settings.warn_limit} 度\n"
                                     + "请及时缴费！")
+            if not self.timer_query.isActive():
                 self.timer_query.start()
         else:
             self.timer_query.stop()
-            QMessageBox.critical(self, "DormElecFeeLeft: 错误",
-                                 "获取电力信息出错，原因:\n"
-                                 + quantity_unit + "\n"
-                                 + "请检查网络后按确定重试。")
-            self.timer_query.start()
+            if quantity_unit == "timeout":
+                self.quantity = -1
+                self.quantity_unit = "请求超时，正在重试..."
+                QTimer.singleShot(3000, self, self.__query_data)
+            else:
+                QMessageBox.critical(self, "DormElecFeeLeft: 错误",
+                                     "获取电力信息出错，原因:\n"
+                                     + quantity_unit + "\n"
+                                     + "请检查配置后按确定重试。")
+                self.timer_query.start()
+                self.__query_data()
 
 
 if __name__ == "__main__":
