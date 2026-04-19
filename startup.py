@@ -1,5 +1,5 @@
+import logging
 import os
-import sys
 import platform
 import subprocess
 import traceback
@@ -8,7 +8,9 @@ if platform.system() == "Windows":
     import winshell  # noqa
     from win32com.client import Dispatch  # noqa
 
-from util import get_program_path, log_error, log_warning
+from util import get_program_path
+
+logger = logging.getLogger("app")
 
 
 def set_autostart(app_name: str, enable: bool) -> bool:
@@ -18,9 +20,9 @@ def set_autostart(app_name: str, enable: bool) -> bool:
     elif sys_name == "Darwin":
         return macos_set_autostart(app_name, enable)
     elif sys_name == "Linux":
-        log_warning("当前不支持Linux开机自启！")
+        logger.warning("当前不支持Linux开机自启！")
         return False
-    log_warning("未知系统环境")
+    logger.warning("未知系统环境")
     return False
 
 
@@ -43,7 +45,7 @@ def win_set_autostart(app_name: str, enable: bool) -> bool:
                 os.remove(shortcut_path)
                 return True
     except Exception as e:
-        log_error(traceback.format_exc())
+        logger.error(traceback.format_exc())
     return False
 
 
@@ -62,7 +64,7 @@ def macos_set_autostart(app_name: str, enable: bool):
         try:
             subprocess.run(["osascript", "-e", script], check=True)
         except subprocess.CalledProcessError:
-            log_error(traceback.format_exc())
+            logger.error(traceback.format_exc())
             return False
         return True
     else:
@@ -74,6 +76,6 @@ def macos_set_autostart(app_name: str, enable: bool):
         try:
             subprocess.run(["osascript", "-e", script], check=True)
         except subprocess.CalledProcessError:
-            log_error(traceback.format_exc())
+            logger.error(traceback.format_exc())
             return False
         return True
