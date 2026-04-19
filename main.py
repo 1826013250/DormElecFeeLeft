@@ -6,7 +6,7 @@ from PySide6.QtCore import QTimer, QThreadPool
 from PySide6.QtGui import QIcon, QAction
 
 from startup import set_autostart
-from util import get_power, TimeUnits, Settings, RunnableGetPowerInfo
+from util import get_power, TimeUnits, Settings, RunnableGetPowerInfo, log_info
 from widgets import DialogSetTimeInterval, DialogSelectDormitory
 
 APP_NAME = "DormElecFeeLeft"
@@ -111,9 +111,13 @@ class App(QWidget):
             self.settings.save()
 
     def __set_startup_on_login(self, status: bool):
-        set_autostart(APP_NAME, status)
-        self.settings.startup_on_login = status
-        self.settings.save()
+        if set_autostart(APP_NAME, status):
+            self.settings.startup_on_login = status
+            self.settings.save()
+        else:
+            QMessageBox.warning(self, "警告", "添加/删除开机自启项目失败！\n"
+                                "可能是当前系统不支持或出现错误！\n"
+                                "查看日志以查询具体消息")
 
     def __modify_student_id(self):
         value, success = QInputDialog.getText(self, "设置学号", "请输入学号")
@@ -152,7 +156,7 @@ class App(QWidget):
             QMessageBox.warning(self, "注意！", "您未选择宿舍！请前往菜单选择您的宿舍")
             self.timer_query.stop()
             return
-        print(datetime.now().strftime("[%Y-%m-%d %H:%M:%S] 查询开始!"))
+        log_info("查询开始!")
         runnable = RunnableGetPowerInfo(self.settings.last_dorm_id)
         runnable.signal.signal_power_request_finished.connect(self.__query_data_callback)
         self.thread_pool.start(runnable)
