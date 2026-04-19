@@ -1,13 +1,18 @@
 import os
 import sys
 import json
+import traceback
 from pathlib import Path
 from typing import Tuple
 from datetime import datetime
 from enum import Enum
 
+import requests
+from pip._internal.utils import logging
 from requests import post
 from PySide6.QtCore import QRunnable, Signal, QObject
+
+logger = logging.getLogger("app")
 
 URL = "https://cloudpaygateway.59wanmei.com:8087/paygateway/smallpaygateway/trade"
 
@@ -29,7 +34,13 @@ def get_power(room_id: str) -> Tuple[float, str]:
         "bizcontent": json.dumps({"payproid": 726, "schoolcode": "43", "roomverify": room_id, "businesstype": 2}),
         "sourceId": 1
     }
-    resp = post(URL, json=data).json()
+    try:
+        resp = post(URL, json=data, timeout=5).json()
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        return -1, "timeout"
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return -1, "Unknown Error: " + str(e)
     if resp["returncode"] == "SUCCESS":
         data = resp["businessData"]
         return float(data["quantity"]), data["quantityunit"]
@@ -53,22 +64,14 @@ def get_details(student_id: str, op_type: int, area_id: str = "0", build_id: str
         }),
         "sourceId": 1
     }
-    resp = post(URL, json=data).json()
+    try:
+        resp = post(URL, json=data).json()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return [str(e)]
     if resp["returncode"] == "SUCCESS":
         return resp["businessData"]
     return resp
-
-
-def log_info(*args, sep=" ", end="\n"):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}/INFO] ", *args, sep=sep, end=end)
-
-
-def log_error(*args, sep=" ", end="\n"):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}/ERROR] ", *args, sep=sep, end=end)
-
-
-def log_warning(*args, sep=" ", end="\n"):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}/WARNING] ", *args, sep=sep, end=end)
 
 
 class TimeUnits(Enum):
