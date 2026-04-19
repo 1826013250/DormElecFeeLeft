@@ -1,6 +1,6 @@
 # DormElecFeeLeft
 
-> **⚠️ 特别说明：本程序是专门针对 **河南工业大学（HAUT）** 的宿舍用电系统环境开发的。依赖于特定的数据接口，其他院校系统无法直接使用。**
+> **特别说明：本程序是专门针对 **河南工业大学（HAUT）** 的宿舍用电系统环境开发的。依赖于特定的数据接口，其他院校系统无法直接使用。**
 
 DormElecFeeLeft 是一款基于 Python 和 PySide6 开发的桌面系统托盘应用程序。主要用于定时监控宿舍的剩余电量，当电量低于用户设置的阈值时，程序会自动弹出警告，提醒您及时缴费。
 
@@ -46,14 +46,14 @@ pip install nuitka
 
 基于不同操作系统，编译为单文件可执行程序的参考命令如下：
 
-**Windows**（已隐藏后台控制台）：
+**Windows**：
 ```bash
-nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable main.py
+nuitka --onefile --standalone --windows-console-mode=disable --enable-plugin=pyside6 --force-stdout-spec=log.txt --main=main.py --output-dir=build
 ```
 
-**macOS** & **Linux**：
+**macOS**：
 ```bash
-nuitka --onefile --plugin-enable=pyside6 main.py
+nuitka ---standalone --macos-create-app-bundle --macos-app-mode=ui-element --plugin-enable=pyside6 --main=main.py --output-dir=build
 ```
 
 ## 基础使用说明
@@ -61,7 +61,3 @@ nuitka --onefile --plugin-enable=pyside6 main.py
 1. **初次启动配置**：初次打开软件时，系统会弹窗提示。请根据提示输入您的学号，随后在弹出的宿舍选择器中逐级选择并绑定您的宿舍号。
 2. **托盘菜单操作**：右键点击右下角的系统托盘图标，可以实时查看当前剩余电量与单位，或是进行其它设置（如修改学号、重选宿舍、调整警告阈值、更改查询时间间隔等）。
 3. **设置开机自启**：在右键托盘菜单中勾选“开机自启”项，即可自动配置。
-
----
-
-*注: 本项目中的程序代码与配置均为原作者开发编写，仅此 `README.md` 说明文件由 AI 生成。*
