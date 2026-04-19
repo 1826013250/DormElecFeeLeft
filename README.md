@@ -48,12 +48,12 @@ pip install nuitka
 
 **Windows**：
 ```bash
-nuitka --onefile --standalone --windows-console-mode=disable --enable-plugin=pyside6 --force-stdout-spec=log.txt --main=main.py --output-dir=build
+nuitka --mode=app-dist --windows-console-mode=disable --enable-plugin=pyside6 --main=main.py --output-dir=build
 ```
 
 **macOS**：
 ```bash
-nuitka ---standalone --macos-create-app-bundle --macos-app-mode=ui-element --plugin-enable=pyside6 --main=main.py --output-dir=build
+nuitka --mode=app-dist --macos-app-mode=ui-element --plugin-enable=pyside6 --main=main.py --output-dir=build
 ```
 
 ## 基础使用说明
@@ -61,3 +61,12 @@ nuitka ---standalone --macos-create-app-bundle --macos-app-mode=ui-element --plu
 1. **初次启动配置**：初次打开软件时，系统会弹窗提示。请根据提示输入您的学号，随后在弹出的宿舍选择器中逐级选择并绑定您的宿舍号。
 2. **托盘菜单操作**：右键点击右下角的系统托盘图标，可以实时查看当前剩余电量与单位，或是进行其它设置（如修改学号、重选宿舍、调整警告阈值、更改查询时间间隔等）。
 3. **设置开机自启**：在右键托盘菜单中勾选“开机自启”项，即可自动配置。
+
+---
+注：Windows/Linux中程序日志、配置文件位于可执行文件同目录下，在macOS位于AppBundle目录中Contents/MacOS目录下
+
+## 卸载方式
+
+1. 关闭开机自启（若开启）
+2. （非macOS用户）删除本程序可执行文件同目录下的settings.json和log.txt
+3. 删除本程序
