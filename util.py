@@ -1,6 +1,7 @@
-import os.path
+import os
 import sys
 import json
+from pathlib import Path
 from typing import Tuple
 from datetime import datetime
 from enum import Enum
@@ -11,13 +12,15 @@ from PySide6.QtCore import QRunnable, Signal, QObject
 URL = "https://cloudpaygateway.59wanmei.com:8087/paygateway/smallpaygateway/trade"
 
 
-def get_program_path():
+def get_program_path() -> str:
     if hasattr(sys, "frozen") or "__compiled__" in globals():
-        return os.path.realpath(sys.argv[0])
-    return os.path.realpath(__file__)
+        return str(Path(sys.argv[0]).resolve())
+    return str(Path(sys.argv[0]).absolute())
 
-def get_program_dir():
+
+def get_program_dir() -> str:
     return os.path.dirname(get_program_path())
+
 
 def get_power(room_id: str) -> Tuple[float, str]:
     data = {
