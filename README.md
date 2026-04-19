@@ -48,7 +48,7 @@ pip install nuitka
 
 **Windows**：
 ```bash
-nuitka --mode=app-dist --windows-console-mode=disable --enable-plugin=pyside6 --main=main.py --output-dir=build
+nuitka --mode=app --windows-console-mode=disable --enable-plugin=pyside6 --main=main.py --output-dir=build
 ```
 
 **macOS**：
